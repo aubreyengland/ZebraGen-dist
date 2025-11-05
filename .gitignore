@@ -1,0 +1,12 @@
+.venv/
+.env
+*.pyc
+__pycache__/
+instance/
+.webassets-cache/
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+.DS_Store
+.csv
