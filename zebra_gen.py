@@ -341,11 +341,6 @@ def main():
         "--site", required=True, help="Site name to filter devices (e.g., 'Main Site')"
     )
     parser.add_argument(
-        "--site-list",
-        default="site_list.xlsx",
-        help="Path to the Excel file containing site names (default: site_list.xlsx)",
-    )
-    parser.add_argument(
         "--output",
         default="sip_credentials.csv",
         help="Output CSV file name (default: sip_credentials.csv)",

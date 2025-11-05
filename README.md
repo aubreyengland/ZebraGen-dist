@@ -29,7 +29,6 @@ python zebra_gen.py --site "<Zoom Site Name>" [--site-list <site_list.xlsx>] [--
 ```
 
 - `--site` (required): The Zoom site name to filter devices (e.g., `"Main Site"`)
-- `--site-list`: Path to Excel file containing site names (default: `site_list.xlsx`)
 - `--output`: Output CSV file name (default: `sip_credentials.csv`)
 
 ### Example
@@ -43,7 +42,7 @@ python zebra_gen.py --site "CORP 195"
 - `requests`
 - `pandas`
 - `python-dotenv`
-- `zebra_gen_client` (custom Zoom API client)
+- `zebra_gen_client` (included custom Zoom API client)
 
 You can install dependencies via:
 
@@ -65,13 +64,11 @@ python zebra_gen.py --site "CORP 195" --output "zebra_195.csv"
 
 ## Notes
 
+- IMPORTANT: Only devices of type "other" (i.e., Zebra devices) whose display names end with `-W` are included in the output.
 - Make sure to set the following environment variables (either in your shell or in a `.env` file in the project directory):
     - `ZOOM_S2S_ACCOUNT_ID`
     - `ZOOM_S2S_CLIENT_ID`
     - `ZOOM_S2S_CLIENT_SECRET`
 - Ensure `dept_info.json` and `site_info.json` are present in the working directory for department and site lookups.
-- Only devices of type "other" (i.e., Zebra devices) whose display names end with `-W` are included in the output.
 - The script logs progress and errors to the console.
 - For more details, review or modify the `zebra_gen.py` source code.
-
-
