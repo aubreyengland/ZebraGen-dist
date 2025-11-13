@@ -1,4 +1,4 @@
-#./usr/bin/env python3
+#!/usr/bin/env python3
 import argparse
 import csv
 import logging
@@ -21,13 +21,31 @@ logger = logging.getLogger(__name__)
 
 
 def resource_path(relative_path: str) -> str:
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    base_path = getattr(
-        sys,
-        "_MEIPASS",
-        os.path.dirname(os.path.abspath(".")),
-    )
+    """Return absolute path to resource, working for PyInstaller and source runs."""
+    if hasattr(sys, "_MEIPASS"):
+        base_path = sys._MEIPASS  # type: ignore[attr-defined]
+    else:
+        base_path = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base_path, relative_path)
+
+
+def load_json_resource(filename: str) -> dict:
+    """Load a JSON resource trying common locations.
+    Order: bundled resource (PyInstaller) -> script directory -> current working directory.
+    Raises FileNotFoundError with a descriptive message if not found.
+    """
+    candidates = [
+        resource_path(filename),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), filename),
+        os.path.join(os.getcwd(), filename),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+    raise FileNotFoundError(
+        f"Could not find '{filename}'. Looked in: " + ", ".join(candidates)
+    )
 
 def get_new_s2s_token() -> str:
     """
@@ -186,13 +204,7 @@ def lookup_dept_name(ext_number_last3) -> str:
     """
     Lookup the department name based on the number.
     """
-    # Check if the last 3 digits of the extension number are in the department names dictionary
-    # If found, return the corresponding department name
-    # Otherwise, return an empty string
-
-    with open(resource_path("dept_info.json"), "r", encoding="utf-8") as f:
-        dept_names = json.load(f)# Load the dept info from the JSON file
-        
+    dept_names = load_json_resource("dept_info.json")  # Load the dept info from the JSON file
     if ext_number_last3 in dept_names:
         return dept_names[ext_number_last3]
     return f"{ext_number_last3} (Not found - Unknown Department)"
@@ -207,9 +219,8 @@ def lookup_site_info(formatted_site_number: str) -> str:
         str: _description_
     """
     # Load the site info from the JSON file
-    with open(resource_path("site_info.json"), "r", encoding="utf-8") as f:
-        site_info_dict = json.load(f)
-        
+    site_info_dict = load_json_resource("site_info.json")
+
     # Extract the last three digits from the formatted site name
     last_three_digits = formatted_site_number[-3:]
 
