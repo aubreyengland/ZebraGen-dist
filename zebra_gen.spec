@@ -5,7 +5,7 @@ a = Analysis(
     ['zebra_gen.py'],
     pathex=['zebra_gen_client'],
     binaries=[],
-    datas=[],
+    datas=[('dept_info.json', '.'), ('site_info.json', '.'), ('env_template.txt', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
