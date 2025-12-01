@@ -21,30 +21,29 @@ logger = logging.getLogger(__name__)
 
 
 def resource_path(relative_path: str) -> str:
-    """Return absolute path to resource, working for PyInstaller and source runs."""
-    if hasattr(sys, "_MEIPASS"):
-        base_path = sys._MEIPASS  # type: ignore[attr-defined]
+    """Return absolute path to a resource located beside the executable (frozen) or this script (source)."""
+    if getattr(sys, "frozen", False):
+        # Running as a bundled executable (e.g., PyInstaller onefile)
+        base_path = os.path.dirname(sys.executable)
     else:
+        # Running from source
         base_path = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base_path, relative_path)
 
 
 def load_json_resource(filename: str) -> dict:
-    """Load a JSON resource trying common locations.
-    Order: bundled resource (PyInstaller) -> script directory -> current working directory.
-    Raises FileNotFoundError with a descriptive message if not found.
+    """Load a JSON resource from the directory beside the executable or script.
+
+    This assumes files like dept_info.json and site_info.json live next to:
+      - the frozen executable (dist/zebra_gen on macOS, zebra_gen.exe on Windows), or
+      - this zebra_gen.py file when running from source.
     """
-    candidates = [
-        resource_path(filename),
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), filename),
-        os.path.join(os.getcwd(), filename),
-    ]
-    for path in candidates:
-        if os.path.exists(path):
-            with open(path, "r", encoding="utf-8") as f:
-                return json.load(f)
+    path = resource_path(filename)
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
     raise FileNotFoundError(
-        f"Could not find '{filename}'. Looked in: " + ", ".join(candidates)
+        f"Could not find '{filename}'. Expected at: {path}"
     )
 
 def get_new_s2s_token() -> str:
