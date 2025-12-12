@@ -1,4 +1,3 @@
-
 # ZebraGen
 
 ## Overview
@@ -24,17 +23,25 @@
 
 ## Usage
 
+To run the utility directly from the code base, use the following command:
+
 ```bash
-python zebra_gen.py --site "<Zoom Site Name>" [--site-list <site_list.xlsx>] [--output <output.csv>]
+python zebra_gen.py --site "<Zoom Site Name>"[--output <output.csv>]
 ```
 
 - `--site` (required): The Zoom site name to filter devices (e.g., `"Main Site"`)
 - `--output`: Output CSV file name (default: `sip_credentials.csv`)
 
-### Example
+to run the Windows executable version, use:
 
 ```bash
-python zebra_gen.py --site "CORP 195"
+zebra_gen.exe --site "<Zoom Site Name>"[--output <output.csv>]
+```
+
+to run the MacOS executable version, use:
+
+```bash
+./zebra_gen --site "<Zoom Site Name>"[--output <output.csv>]
 ```
 
 ## Dependencies
@@ -66,9 +73,9 @@ python zebra_gen.py --site "CORP 195" --output "zebra_195.csv"
 
 - IMPORTANT: Only devices of type "other" (i.e., Zebra devices) whose display names end with `-W` are included in the output.
 - Make sure to set the following environment variables (either in your shell or in a `.env` file in the project directory):
-    - `ZOOM_S2S_ACCOUNT_ID`
-    - `ZOOM_S2S_CLIENT_ID`
-    - `ZOOM_S2S_CLIENT_SECRET`
+  - `ZOOM_S2S_ACCOUNT_ID`
+  - `ZOOM_S2S_CLIENT_ID`
+  - `ZOOM_S2S_CLIENT_SECRET`
 - Ensure `dept_info.json` and `site_info.json` are present in the working directory for department and site lookups.
 - The script logs progress and errors to the console.
 - For more details, review or modify the `zebra_gen.py` source code.
