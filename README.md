@@ -14,7 +14,7 @@
 - Supports filtering by Zoom site name
 - Handles department and site name lookups via local JSON files
 
-## Requirements
+## Development Requirements
 
 - Python 3.7+
 - Zoom account with API access and Server-to-Server OAuth app credentials
