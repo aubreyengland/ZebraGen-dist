@@ -12,3 +12,4 @@ dist/
 .csv
 build/
 *.spec
+*.zip
