@@ -7,8 +7,7 @@ import sys
 import re
 import json
 import requests 
-import pandas as pd
-from pathlib import Path
+from typing import Any, Dict, Iterable
 from requests.auth import HTTPBasicAuth
 from zebra_gen_client import ZoomSimpleClient as zsc
 from dotenv import load_dotenv
@@ -21,13 +20,25 @@ logger = logging.getLogger(__name__)
 
 
 def resource_path(relative_path: str) -> str:
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    base_path = getattr(
-        sys,
-        "_MEIPASS",
-        os.path.dirname(os.path.abspath(".")),
-    )
-    return os.path.join(base_path, relative_path)
+    """ Get absolute path to resource. Checks local dir first, then PyInstaller bundle. """
+    # 1. Define the local path (next to the executable or script)
+    if getattr(sys, 'frozen', False):
+        base_path = os.path.dirname(sys.executable)
+    else:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    
+    local_path = os.path.join(base_path, relative_path)
+
+    # 2. If the file exists locally, return that path
+    if os.path.exists(local_path):
+        return local_path
+
+    # 3. If not found locally, check the PyInstaller temp folder (_MEIPASS)
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative_path)
+
+    # 4. Return local_path as default (so error points to the expected location)
+    return local_path
 
 def get_new_s2s_token() -> str:
     """
@@ -324,12 +335,12 @@ def build_csv_rows(devices: list, client) -> list:
     return rows
 
 
-def filter_devices_by_site(devices: list, site_name_filter: str) -> list:
+def filter_devices_by_site(devices: Iterable[Dict[str, Any]], site_name_filter: str) -> list:
     """
     Filter the device list to include only those whose site name contains the given site_name_filter (case-insensitive).
     """
     if not site_name_filter:
-        return devices
+        return list(devices)
     filtered = []
     for device in devices:
         site_name = device.get("site", {}).get("name", "")
@@ -338,16 +349,18 @@ def filter_devices_by_site(devices: list, site_name_filter: str) -> list:
     return filtered
 
 
-def filter_devices_by_display_name(devices: list, suffix: str) -> list:
+
+def filter_devices_by_mac_address(devices: list, mac_prefix: str) -> list:
     """
-    Filter the devices list to include only those whose display_name ends with the given suffix.
+    Filter the devices list to include only those whose MAC address starts with the given mac_prefix.
     """
     return [
         device
         for device in devices
-        if device.get("display_name", "").strip().endswith(suffix)
+        if device.get("mac_address", "").strip().upper().startswith(mac_prefix.upper())
+        #Skip devices with mac addresses ending in 595
+        and not device.get("mac_address", "").strip().upper().endswith("595")
     ]
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -374,7 +387,7 @@ def main():
     client = zsc(token)
 
     # Retrieve devices of type "other"
-    devices = client.phone_devices.list(type_filter="other")
+    devices = list(client.phone_devices.list(type_filter="other"))
 
     # Filter devices by the given site name
     devices = filter_devices_by_site(devices, args.site)
@@ -384,7 +397,7 @@ def main():
     
     
     # Further filter devices to only those whose display_name ends with "-W"
-    devices = filter_devices_by_display_name(devices, "-W")
+    devices = filter_devices_by_mac_address(devices, "FFFFFF")
     logger.info("Found %d Zebra devices on Zoom for site '%s' - prepping to write to Zebra CSV", len(devices), args.site)
     if not devices:
         logger.info(

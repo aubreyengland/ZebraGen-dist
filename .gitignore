@@ -10,3 +10,5 @@ htmlcov/
 dist/
 .DS_Store
 .csv
+build/
+*.spec
