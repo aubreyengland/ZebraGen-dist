@@ -19,7 +19,7 @@
 - Python 3.7+
 - Zoom account with API access and Server-to-Server OAuth app credentials
 - `dept_info.json` and `site_info.json` files for department/site lookups
-- (Optional) `.env` file for storing Zoom API credentials
+- `.env` file for storing Zoom API credentials
 
 ## Usage
 
